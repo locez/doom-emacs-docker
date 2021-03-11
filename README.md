@@ -7,7 +7,7 @@ doom emacs in docker
 make sure your current user can run docker command, if it does not take effect, simply try to reboot your system
 
 ```bash
-# sudo usermod -a -G docker locez
+# sudo usermod -a -G docker $USER
 ```
 
 generate `Dockerfile`, `docker-compose.yml` and `doom-emacs` script
