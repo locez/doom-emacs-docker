@@ -28,7 +28,7 @@ cat <<EOF > ${DOCKERFILE}
 FROM archlinux:latest
 SHELL ["/bin/bash", "-c"]
 RUN pacman -Syu --noconfirm && \
-    pacman -S emacs git ripgrep  --noconfirm
+    pacman -S emacs git ripgrep base-devel librime librime-data fd --noconfirm
 
 ENV DISPLAY=${DISPLAY}
 RUN mkdir -p ${HOME} && \\
@@ -79,7 +79,7 @@ fi
 cat << EOF > ${COMPOSEFILE}
 version: "3"
 services:
-  ros_dev:
+  doom:
     build:
       context: .
       dockerfile: Dockerfile
@@ -133,7 +133,19 @@ while true; do
       cat << EOF > ${INSTALL_PATH}/${SCRIPT_NAME}
 #!/usr/bin/env bash
 CID=\$(docker ps | grep ${IMAGE_NAME} |cut -d ' ' -f1)
-docker exec -it --user \$USER \$CID bash -c "export QT_X11_NO_MITSHM=1; ~/.emacs.d/bin/doom \$*"
+option=""
+if [ -z "\$*" ]; then
+	option="run"
+        docker exec --user \$USER \$CID bash -c "export QT_X11_NO_MITSHM=1; ~/.emacs.d/bin/doom \$option " &
+	disown
+	exit 0
+
+elif [ "\$1" == "shell" ]; then
+         docker exec -it --user \$USER \$CID bash -c "export QT_X11_NO_MITSHM=1; bash"
+else
+	option="\$*"
+fi
+docker exec -it --user \$USER \$CID bash -c "export QT_X11_NO_MITSHM=1; ~/.emacs.d/bin/doom \$option"
 EOF
       chmod +x ${INSTALL_PATH}/${SCRIPT_NAME}      
       break;;
